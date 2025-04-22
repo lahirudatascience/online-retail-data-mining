@@ -51,12 +51,3 @@ The project is implemented in **R**, focusing on:
    - Generated frequent itemsets and association rules.
 
 ---
-
-## 📦 How to Run
-
-Make sure you have the required libraries:
-
-```r
-install.packages("arules")
-install.packages("arulesViz")
-install.packages("readxl")
