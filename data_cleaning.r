@@ -26,7 +26,7 @@ retail_clean <- retail_data %>%
   # emove missing or empty Description
   filter(!is.na(Description) & Description != "") %>%
   
-  # Remove rows with Quantity or UnitPrice <= 0
+  # Remove rows with Quantity and UnitPrice <= o
   filter(Quantity > 0, UnitPrice > 0) %>%
   
   # Remove cancelled invoices (starting with 'C')
@@ -42,6 +42,11 @@ retail_clean <- retail_data %>%
 cat("Original rows:", nrow(retail_data), "\n")
 cat("Cleaned rows:", nrow(retail_clean), "\n")
 cat("Remaining missing CustomerIDs:", sum(is.na(retail_clean$CustomerID)), "\n")
+cat("Remaining missing Descriptions:", sum(is.na(retail_clean$Description)), "\n")
+cat("Remaining negative Quantities:", sum(retail_clean$Quantity <= 0), "\n")
+cat("Remaining negative UnitPrices:", sum(retail_clean$UnitPrice <= 0), "\n")
+cat("Remaining cancelled invoices:", sum(grepl("^C", retail_clean$InvoiceNo)), "\n")
+cat("Remaining delivery and adjustment codes:", sum(retail_clean$StockCode %in% c("POST", "D", "C2", "M", "BANK CHARGES", "AMAZONFEE")), "\n")
 
 # tep 3: Save the cleaned data
 output_path <- "~/Documents/online-retail-data-mining/online_retail_clean_data.xlsx"
