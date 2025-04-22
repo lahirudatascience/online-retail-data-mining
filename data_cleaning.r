@@ -49,7 +49,7 @@ cat("Number of transactions with negative Unit Price:", negative_up$n, "\n")
 # View some examples of negative Unit Price transactions
 head(retail_data[retail_data$UnitPrice < 0, ])
 
-# Step 2: Enhanced Missing Value and Data Quality Management
+# Step 2: Missing Value and Data Quality Management
 clean_retail_data <- function(retail_data) {
   retail_data %>%
     # 1. Handle missing CustomerID (keep but mark as Unknown)
