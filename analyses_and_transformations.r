@@ -3,7 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(readxl)
 library(writexl)
-
+library(ggcorrplot)
 
 # Load the cleaned retail dataset
 data_path <- "~/Documents/online-retail-data-mining/online_retail_clean_data.xlsx"
@@ -92,6 +92,33 @@ customer_items <- retail_clean %>%
   summarise(TotalItems = sum(Quantity)) %>%
   arrange(desc(TotalItems))
 
+# Calculate total revenue
+revenue_country <- retail_clean %>%
+  mutate(Revenue = Quantity * UnitPrice) %>%
+  group_by(Country) %>%
+  summarise(TotalRevenue = sum(Revenue)) %>%
+  arrange(desc(TotalRevenue)) %>%
+  top_n(10)
+
+# Plot: Revenue per country
+ggplot(revenue_country, aes(x = reorder(Country, TotalRevenue), y = TotalRevenue)) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  coord_flip() +
+  labs(title = "Top 10 Countries by Revenue",
+       x = "Country", y = "Total Revenue") +
+  theme_minimal()
+
+# --- Invoice Value Distribution ---
+# Plot: Distribution of invoice values
+retail_clean %>%
+  mutate(InvoiceValue = Quantity * UnitPrice) %>%
+  ggplot(aes(x = InvoiceValue)) +
+  geom_histogram(binwidth = 10, fill = "purple", color = "white") +
+  xlim(0, 500) +
+  labs(title = "Distribution of Invoice Values",
+       x = "Invoice Value", y = "Frequency") +
+  theme_minimal()
+
 # Step Visualize outliers using boxplot
 ggplot(customer_items, aes(y = TotalItems)) +
   geom_boxplot(fill = "tomato", outlier.color = "blue") +
@@ -114,6 +141,44 @@ ggplot(customer_items, aes(y = TotalItems)) +
 retail_no_outliers <- retail_clean %>%
   filter(CustomerID %in% customer_items$CustomerID)
 
+# --- Correlation Heatmap ---
+# Select numeric columns only
+numeric_cols <- retail_no_outliers %>%
+  select(where(is.numeric))
+
+# Add TotalPrice column: Quantity * UnitPrice
+retail_no_outliers <- retail_no_outliers %>%
+  mutate(TotalPrice = Quantity * UnitPrice)
+
+# Create aggregated features per Customer
+customer_features <- retail_no_outliers %>%
+  group_by(CustomerID) %>%
+  summarise(
+    TotalQuantity = sum(Quantity),
+    TotalRevenue = sum(TotalPrice),
+    AverageUnitPrice = mean(UnitPrice),
+    AverageQuantity = mean(Quantity),
+    NumberOfInvoices = n_distinct(InvoiceNo),
+    AverageInvoiceValue = TotalRevenue / NumberOfInvoices
+  )
+
+# View the new customer-level feature data
+head(customer_features)
+
+# Compute correlation matrix
+correlation_matrix_new <- cor(customer_features %>% select(where(is.numeric)), use = "complete.obs")
+
+# Plot the enhanced correlation heatmap
+ggcorrplot(correlation_matrix_new,
+           method = "square",
+           type = "lower",
+           lab = TRUE,
+           lab_size = 3,
+           colors = c("red", "white", "blue"),
+           title = "Enhanced Correlation Heatmap of Customer Features",
+           ggtheme = theme_minimal())
+
+
 # Step: Save the new dataset without extreme outliers
 output_path <- "~/Documents/online-retail-data-mining/online_retail_no_outliers.xlsx"
 write_xlsx(retail_no_outliers, path = output_path)
@@ -124,8 +189,6 @@ if (file.exists(output_path)) {
 } else {
   cat("❌ File not saved. Check your path.\n")
 }
-
-
 
 
 

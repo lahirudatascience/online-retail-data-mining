@@ -23,7 +23,7 @@ retail_clean <- retail_data %>%
   # Remove rows without CustomerID
   filter(!is.na(CustomerID)) %>%
   
-  # emove missing or empty Description
+  # emove missing or empty Descriptions
   filter(!is.na(Description) & Description != "") %>%
   
   # Remove rows with Quantity and UnitPrice <= o
@@ -33,7 +33,10 @@ retail_clean <- retail_data %>%
   filter(!grepl("^C", InvoiceNo)) %>%
   
   # Remove delivery and adjustment codes
-  filter(!StockCode %in% c("POST", "D", "C2", "M", "BANK CHARGES", "AMAZONFEE")) %>%
+  filter(!StockCode %in% c("POST", "D", "C2", "DOT", "M", "m", 
+                           "BANK CHARGES", "S", "AMAZONFEE", 
+                           "gift_0001_40", "gift_0001_50", "gift_0001_30", "gift_0001_20", "gift_0001_10",
+                           "gift_0001_20")) %>%
   
   # lean Description (uppercase and trim spaces)
   mutate(Description = str_trim(toupper(Description)))
@@ -46,7 +49,6 @@ cat("Remaining missing Descriptions:", sum(is.na(retail_clean$Description)), "\n
 cat("Remaining negative Quantities:", sum(retail_clean$Quantity <= 0), "\n")
 cat("Remaining negative UnitPrices:", sum(retail_clean$UnitPrice <= 0), "\n")
 cat("Remaining cancelled invoices:", sum(grepl("^C", retail_clean$InvoiceNo)), "\n")
-cat("Remaining delivery and adjustment codes:", sum(retail_clean$StockCode %in% c("POST", "D", "C2", "M", "BANK CHARGES", "AMAZONFEE")), "\n")
 
 # tep 3: Save the cleaned data
 output_path <- "~/Documents/online-retail-data-mining/online_retail_clean_data.xlsx"
@@ -58,3 +60,4 @@ if (file.exists(output_path)) {
 } else {
   cat("Failed to save the file. Check your file path.\n")
 }
+
