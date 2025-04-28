@@ -73,13 +73,6 @@ for (country in top_countries) {
   write.csv(rules_df, 
             file = paste0(output_dir, "association_rules_", country_clean_name, ".csv"), 
             row.names = FALSE)
-  
-  # Save top 10 association rules graph
-  png(filename = paste0(output_dir, "association_rules_graph_", country_clean_name, ".png"), 
-      width = 800, height = 600)
-  plot(head(analysis_result$association_rules, 10), 
-       method = "graph", 
-       main = paste("Top 10 Association Rules -", country))
   dev.off()
 }
 
